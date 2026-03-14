@@ -1,0 +1,25 @@
+services:
+  vllm-asr:
+    image: stelterlab/vllm-openai:v0.17.1-audio
+    container_name: vllm-asr
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - $HOME/.cache/huggingface/hub:/root/.cache/huggingface/hub
+    ports:
+      - "8101:8101"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    entrypoint: vllm serve openai/whisper-large-v3 --gpu-memory-utilization 0.06 --port 8101
+    networks:
+      - ihearvoices
+
+networks:
+  ihearvoices:
+    driver: bridge
+    name: ihearvoices
